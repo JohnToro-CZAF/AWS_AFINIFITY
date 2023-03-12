@@ -20,12 +20,12 @@ There are 2 compulsory arguments to pass. `ContentType` specifies the type of co
 
 The next part of the tutorial was correct. Just follow through. When testing with Postman API, it worked.
 
-![](/../../Diagram/postman_1.png)
+![](postman_1.png)
 
 Okay, but it turned out that API Gateway only handled HTTPS request, while our backend requests is HTTP. The easiest way is to set up a CloudFront distribution, as described [here](https://stackoverflow.com/questions/43236152/how-to-make-aws-api-gateway-accept-http-instead-of-https/44901263) (follow the Smartcam project mentioned). Another way is to use [Elastic Beanstalk](https://aws.amazon.com/elasticbeanstalk/) by setting up a web app just for this purpose.
 
 After configuring a CloudFront distribution, it worked.
 
-![](/../../Diagram/postman_2.png)
+![](postman_2.png)
 
 Afterwards, team web app integrated the API to the backend and it worked.
