@@ -1,3 +1,3 @@
 # AWS_AFINIFITY
 
-![](Diagram/AWS Diagram.drawio.png)
+![](/Diagram/AWS%20Diagram.drawio.png)
