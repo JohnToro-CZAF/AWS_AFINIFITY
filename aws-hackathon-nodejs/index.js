@@ -6,7 +6,7 @@ const { Server } = require("socket.io");
 // Database
 const { logsSchema } = require("./models/Logs");
 const mongoose = require("mongoose");
-const uri = "mongodb+srv://JohnPhan:Hoang1234567@thoughtfull.x1ku74i.mongodb.net/?retryWrites=true&w=majority";
+const uri = "mongodb://localhost:27017";
 const databaseName = "TrainingLog";
 const options = {
   useNewUrlParser: true,
