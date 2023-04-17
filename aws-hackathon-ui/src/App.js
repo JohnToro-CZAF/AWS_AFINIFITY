@@ -15,7 +15,6 @@ export default function App() {
         <Route path="/chatbox" element={<Chat socket={socket} />} />
       </Routes>
     </div>
-
   );
 }
 

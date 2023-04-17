@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { SCORE_DOMAIN, SUGGESTION_DOMAIN } from '../../Redux/Constants';
+import { SCORE_DOMAIN, SENTIMENT_DOMAIN, SUGGESTION_DOMAIN, REPLY_DOMAIN } from '../../Redux/Constants';
 import "./Chat.css"
 
 export default function Chat(props) {
@@ -22,14 +22,14 @@ export default function Chat(props) {
         let count = messageList.length - 1;
 
         for (let i = messageList.length - 1; i >= 0; i--) {
-            if (messageList[i].author !== "Mentor") {
+            if (messageList[i].author !== "professional") {
                 break;
             }
             count--;
         }
 
         for (let i = count; i >= 0; i--) {
-            if (messageList[i].author !== "Mentee") {
+            if (messageList[i].author !== "client") {
                 break;
             }
             menteePreviousMessageList.push(messageList[i]);
@@ -45,10 +45,8 @@ export default function Chat(props) {
         }
         return context
     }
-
     const getSuggestion = async () => {
         const context = getContext()
-
         var myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
 
@@ -170,12 +168,11 @@ export default function Chat(props) {
                 setSuggestion([...component])
             })
             .catch(error => console.log('error', error));
-
     }
 
     const checkAndSendMessage = async () => {
         if (currentMessage !== "") {
-            if (username === "Mentor") {
+            if (username === "professional") {
                 const context = getContext()
 
                 var myHeaders = new Headers();
@@ -193,7 +190,7 @@ export default function Chat(props) {
                     redirect: 'follow'
                 };
 
-                console.log(raw)
+                console.log("dumb", raw)
 
                 fetch(SCORE_DOMAIN, requestOptions)
                     .then(response => response.text())
@@ -201,13 +198,14 @@ export default function Chat(props) {
                         let score = JSON.parse(result).score
                         console.log(score)
                         if (score < 1) {
-                            alert("Your message may be harmful to the mentee")
+                            alert("Your response could be improved. Please check the suggestion below.")
                             setNeedHelp(true)
                             setSuggestion([])
                             return
                         } else {
                             setNeedHelp(false)
                             sendMessage()
+                            sendMessageArtificial()
                         }
                     })
                     .catch(error => console.log('error', error));
@@ -217,8 +215,88 @@ export default function Chat(props) {
             }
         }
     };
+    const getSentiment = async (sent) => {
+        var myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+        
+        var raw = JSON.stringify({
+            "message": sent
+        });
+
+        console.log(raw)
+
+        var requestOptions = {
+            method: 'POST',
+            headers: myHeaders,
+            body: raw,
+            redirect: 'follow'
+        }; 
+        return fetch(SENTIMENT_DOMAIN, requestOptions)
+            .then(response => response.text())
+            .then((result) => {
+                return JSON.parse(result).sentiment
+            })
+            .catch(error => console.log('error', error));
+    }
+    const sendMessageArtificial = async () => {
+        console.log("send message artificial")
+        const messageData = {
+            room: 1,
+            author: "client",
+            message: "Okelah",
+            time:
+                new Date(Date.now()).getHours() +
+                ":" +
+                new Date(Date.now()).getMinutes(),
+        };
+        await getText().then((result) => {
+            console.log("result", result)
+            messageData.message = result;
+        });
+        console.log(messageData)
+        await getSentiment(messageData.message).then((result) => {
+            messageData.sentiment = result;
+        });
+        await socket.emit("send_message", messageData);
+        setMessageList((list) => [...list, messageData]);
+    }
+
+    const getText = async () => {
+        var myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+        var messageListCp = [...messageList]
+        messageListCp.push(
+            {
+                room: 1,
+                author: "professional",
+                message: currentMessage,
+                time:
+                    new Date(Date.now()).getHours() +
+                    ":" +
+                    new Date(Date.now()).getMinutes(),
+            });
+        var raw = JSON.stringify({
+            "messages": messageListCp
+        });
+        console.log("calling getText, sending object to REPLY domain is: ", raw);
+        var requestOptions = {
+            method: 'POST',
+            headers: myHeaders,
+            body: raw,
+            redirect: 'follow'
+        };
+
+        return await fetch(REPLY_DOMAIN, requestOptions)
+            .then(response => response.text())
+            .then((result) => {
+                console.log("answer from reply domain in getText: ", JSON.parse(result).message)
+                return JSON.parse(result).message;
+            })
+            .catch(error => console.log('error', error));
+    }
 
     const sendMessage = async () => {
+        console.log("send message");
         const messageData = {
             room: room,
             author: username,
@@ -228,7 +306,9 @@ export default function Chat(props) {
                 ":" +
                 new Date(Date.now()).getMinutes(),
         };
-
+        await getSentiment(currentMessage).then((result) => {
+            messageData.sentiment = result;
+        });
         await socket.emit("send_message", messageData);
         setMessageList((list) => [...list, messageData]);
         setCurrentMessage("");
@@ -241,7 +321,7 @@ export default function Chat(props) {
         // let mentorMessage = ""
 
         for (let i = 0; i < messageList.length; i++) {
-            if (messageList[i].author === "Mentor") {
+            if (messageList[i].author === "professional") {
                 mentorMessageList.push(messageList[i].message.replace("'", ""));
             } else {
                 menteePreviousMessageList.push(messageList[i].message.replace("'", ""));
@@ -256,38 +336,6 @@ export default function Chat(props) {
         return context
     }
 
-    const getText = async () => {
-        const context = getFullContext()
-
-        var myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
-        console.log(context.past_user_inputs)
-        console.log(context.generated_responses)
-        console.log(context.text)
-
-        var raw = JSON.stringify({
-            "inputs": {
-                "past_user_inputs": context.past_user_inputs,
-                "generated_responses": context.generated_responses,
-                "text": context.text
-            }
-        });
-
-        var requestOptions = {
-            method: 'POST',
-            headers: myHeaders,
-            body: raw,
-            redirect: 'follow'
-        };
-
-        await fetch("http://54.254.254.48:5000/generate", requestOptions)
-            .then(response => response.text())
-            .then((result) => {
-                console.log(JSON.parse(result).generated_text)
-                setCurrentMessage(JSON.parse(result).generated_text)
-            })
-            .catch(error => console.log('error', error));
-    }
 
     const renderMessage = () => {
         return messageList.map((messageContent, index) => {
@@ -297,6 +345,8 @@ export default function Chat(props) {
                         <p style={{ fontWeight: "bold", fontSize: "20px" }}>{messageContent.author}</p>
                         <p>{messageContent.message}</p>
                         <p style={{ fontSize: "12px", color: "gray" }}>{messageContent.time}</p>
+                        {(messageContent.author === "client" && username==="professional") ? <p style={{ fontSize: "12px", color: "gray" }}>{messageContent.sentiment}</p> : null}
+                        {/* <p> {messageContent.sentiment} </p> */}
                     </div>
                 </div>
             );
@@ -305,6 +355,7 @@ export default function Chat(props) {
 
     useEffect(() => {
         socket.on("receive_message", (data) => {
+            console.log(data)
             setMessageList((list) => [...list, data]);
         });
     }, [socket]);
@@ -322,7 +373,7 @@ export default function Chat(props) {
         <div style={{ width: "100%", height: "100vh", display: "flex", flexDirection: "column", justifyContent: "space-between", overflowX: "hidden", overflowY: "scroll" }}>
             <div>
                 <div style={{ height: "100px", background: "#263238", display: "flex", alignItems: "center", justifyContent: "space-between", margin: "0" }}>
-                    <p style={{ fontSize: "32px", color: "white", marginLeft: "10px", fontWeight: "bold" }}>Se<span style={{ color: "#205bec" }}>same</span>  Live chat</p>
+                    <p style={{ fontSize: "32px", color: "white", marginLeft: "10px", fontWeight: "bold" }}>ThoughtFull<span style={{ color: "#205bec" }}></span> live training session</p>
                     <div style={{ marginRight: "10px" }}>
                         <button onClick={() => {
                             navigate('/', { replace: true })
@@ -395,7 +446,7 @@ export default function Chat(props) {
                     />
                     <button style={{
                         border: "0",
-                        display: `${username === "Mentor" ? "grid" : "none"}`,
+                        display: `${username === "professional" ? "grid" : "none"}`,
                         placeItems: "center",
                         cursor: "pointer",
                         flex: "10%",
@@ -411,7 +462,7 @@ export default function Chat(props) {
                     }}>Get text</button>
                     <button style={{
                         border: "0",
-                        display: `${username === "Mentor" ? "grid" : "none"}`,
+                        display: `${username === "professional" ? "grid" : "none"}`,
                         placeItems: "center",
                         cursor: "pointer",
                         flex: "5%",
@@ -431,7 +482,7 @@ export default function Chat(props) {
                         display: "grid",
                         placeItems: "center",
                         cursor: "pointer",
-                        flex: `${username === "Mentor" ? "5%" : "20%"}`,
+                        flex: `${username === "professional" ? "5%" : "20%"}`,
                         height: "100%",
                         backgroundColor: "transparent",
                         outline: "none",

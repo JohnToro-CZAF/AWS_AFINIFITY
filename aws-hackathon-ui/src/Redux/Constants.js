@@ -1,7 +1,11 @@
 export const SET_NAME_AND_ROOM = "SET_NAME_AND_ROOM"
 
-export const DOMAIN = "http://52.221.180.73:4000"
+export const DOMAIN = "http://3.86.194.249:4000"
 
-export const SCORE_DOMAIN = "http://54.254.254.48:5000/predict"
+// empathy domain EC2
+export const SCORE_DOMAIN = "http://34.204.9.112:5000/predict"
+export const SENTIMENT_DOMAIN = "http://34.204.9.112:5000/get_sentiment"
 
-export const SUGGESTION_DOMAIN = "http://54.255.161.39:8080/get_suggestion"
+// suggestion domain EC2
+export const REPLY_DOMAIN = "http://3.83.107.211:8080/get_reply"
+export const SUGGESTION_DOMAIN = "http://3.83.107.211:8080/get_suggestion"
