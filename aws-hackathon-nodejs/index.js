@@ -1,17 +1,28 @@
 const express = require("express");
-const app = express();
 const http = require("http");
 const cors = require("cors");
-const redis = require("redis");
 const { Server } = require("socket.io");
-const REDIS_PORT = 6379;
-const client = redis.createClient(REDIS_PORT);
+
+// Database
+const { logsSchema } = require("./models/Logs");
+const mongoose = require("mongoose");
+const uri = "mongodb+srv://JohnPhan:Hoang1234567@thoughtfull.x1ku74i.mongodb.net/?retryWrites=true&w=majority";
+const databaseName = "TrainingLog";
+const options = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  dbName: databaseName,
+};
+mongoose.connect(uri, options)
+  .then(() => console.log("Connected."))
+  .catch((error) => console.log(`Error
+connecting to MongoDB ${error}`));
+const Logs = mongoose.model("Logs", logsSchema);
+
+// The app
+const app = express();
 app.use(cors());
-
 const server = http.createServer(app);
-
-var messageList = []
-
 const io = new Server(server, {
   cors: {
     origin: '*',
@@ -19,25 +30,45 @@ const io = new Server(server, {
   },
 });
 
-io.on("connection", (socket) => {
-  console.log(`User Connected: ${socket.id}`);
+var messageList = {}
 
+io.on("connection", (socket) => {
+  console.log(`User Connected: ${socket.handshake.address}`);
+  
   socket.on("join_room", async (room) => {
     await socket.join(room);
-    // socket.emit('hello', messageList)
-    // console.log(messageList)
-    console.log(`User with ID: ${socket.id} joined room: ${room}`);
+    const userId = socket.handshake.address;
+    messageList[room] = []
+    console.log(`User with ID: ${userId} joined room: ${room}`);
   });
 
   socket.on("send_message", (data) => {
-    messageList.push(data)
+    messageList[data.room].push(data);
     socket.to(data.room).emit("receive_message", data);
-    
   });
 
-  socket.on("disconnect", () => {
-    console.log("User Disconnected", socket.id);
-    messageList = []
+  socket.on("disconnecting", async () => {
+    const userId = socket.handshake.address;
+    const rooms = [...socket.rooms];
+    const room = rooms[1].toString();
+    const existingLog = await Logs.findOne( { userId: userId } );
+    if (existingLog) {
+      existingLog.chatSessions.push({
+        userId: 2,
+        history: messageList[room],
+      });
+      console.log(existingLog);
+      await existingLog.save();
+    } else {
+      const newLog = new Logs();
+      newLog.userId = userId;
+      newLog.chatSessions.push({
+        userId: 2,
+        history: messageList[room],
+      });
+      await newLog.save();
+    }
+    messageList[room] = []
   });
 });
 
