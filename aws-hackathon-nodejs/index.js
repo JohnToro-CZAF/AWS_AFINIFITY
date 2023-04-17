@@ -2,12 +2,15 @@ const express = require("express");
 const app = express();
 const http = require("http");
 const cors = require("cors");
+const redis = require("redis");
 const { Server } = require("socket.io");
+const REDIS_PORT = 6379;
+const client = redis.createClient(REDIS_PORT);
 app.use(cors());
 
 const server = http.createServer(app);
 
-// const messageList = []
+var messageList = []
 
 const io = new Server(server, {
   cors: {
@@ -27,12 +30,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send_message", (data) => {
-    // messageList.push(data)
+    messageList.push(data)
+    console.log(messageList)
     socket.to(data.room).emit("receive_message", data);
   });
 
   socket.on("disconnect", () => {
     console.log("User Disconnected", socket.id);
+    messageList = []
   });
 });
 
