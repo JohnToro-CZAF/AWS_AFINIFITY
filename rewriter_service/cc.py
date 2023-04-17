@@ -2,7 +2,7 @@ import openai
 import os
 import time
 import ast
-openai.api_key = "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"
+# openai.api_key = # API KEY
 openai.Model.list()
 
 def reply(seeker, supporter):
