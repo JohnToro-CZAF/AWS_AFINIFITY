@@ -444,7 +444,7 @@ export default function Chat(props) {
                             event.key === "Enter" && checkAndSendMessage();
                         }}
                     />
-                    <button style={{
+                    {/* <button style={{
                         border: "0",
                         display: `${username === "professional" ? "grid" : "none"}`,
                         placeItems: "center",
@@ -459,13 +459,13 @@ export default function Chat(props) {
                         borderRight: "1px dotted black"
                     }} onClick={async () => {
                         await getText();
-                    }}>Get text</button>
+                    }}>Get text</button> */}
                     <button style={{
                         border: "0",
                         display: `${username === "professional" ? "grid" : "none"}`,
                         placeItems: "center",
                         cursor: "pointer",
-                        flex: "5%",
+                        flex: "15%",
                         height: "100%",
                         backgroundColor: "transparent",
                         outline: "none",
@@ -476,7 +476,7 @@ export default function Chat(props) {
                     }} onClick={async () => {
                         await getSuggestion()
                         setNeedHelp(false)
-                    }}>Check</button>
+                    }}>Get suggestion</button>
                     <button style={{
                         border: "0",
                         display: "grid",
