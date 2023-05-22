@@ -197,16 +197,16 @@ export default function Chat(props) {
                     .then((result) => {
                         let score = JSON.parse(result).score
                         console.log(score)
-                        if (score < 1) {
-                            alert("Your response could be improved. Please check the suggestion below.")
-                            setNeedHelp(true)
-                            setSuggestion([])
-                            return
-                        } else {
-                            setNeedHelp(false)
-                            sendMessage()
-                            sendMessageArtificial()
-                        }
+                        // if (score < 1) {
+                        //     alert("Your response could be improved. Please check the suggestion below.")
+                        //     setNeedHelp(true)
+                        //     setSuggestion([])
+                        //     return
+                        // } else {
+                        setNeedHelp(false)
+                        sendMessage()
+                        sendMessageArtificial()
+                        // }
                     })
                     .catch(error => console.log('error', error));
 

@@ -10,14 +10,6 @@ export default function HomeHeader() {
                         Thought<span style={{color: "#0E6781"}}>Full</span>
                         </a>
                     </div>
-                    <div>
-                        <button style={{marginLeft: "10px", cursor: "pointer", padding: "5px 20px", borderRadius: "10px", border: "solid 1px transparent", backgroundColor: "#0E6781", fontSize: "24px", color: "white"}} type="button">
-                            Login
-                        </button>
-                        <button style={{marginLeft: "10px", cursor: "pointer", padding: "5px 20px", borderRadius: "10px", border: "solid 1px transparent", backgroundColor: "#0E6781", fontSize: "24px", color: "white"}} type="button">
-                            SignUp
-                        </button>
-                    </div>
                 </div>
             </div>
         </header>
