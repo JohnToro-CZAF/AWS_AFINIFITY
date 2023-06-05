@@ -12,7 +12,12 @@ export default function Chat(props) {
     const [messageList, setMessageList] = useState([]);
     const [needHelp, setNeedHelp] = useState(false)
     const [suggestion, setSuggestion] = useState([]);
+    const [suggestion1, setSuggestion1] = useState([]);
+    const [suggestion2, setSuggestion2] = useState([]);
     const [suggestionText, setSuggestionText] = useState([]);
+    const [suggestionText1, setSuggestionText1] = useState([]);
+    const [suggestionText2, setSuggestionText2] = useState([]);
+    const [isLoading, setIsLoading] = useState(false)
     const navigate = useNavigate()
 
     const getContext = () => {
@@ -46,6 +51,7 @@ export default function Chat(props) {
         return context
     }
     const getSuggestion = async () => {
+        setIsLoading(true)
         const context = getContext()
         var myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
@@ -75,99 +81,53 @@ export default function Chat(props) {
                 }
                 console.log(operations)
                 let suggestionText = []
-                for (let i = 0; i < operations.length; i++) {
-                    const operation = operations[i]
+                let suggestionText1 = []
+                let suggestionText2 = []
+                for (let i = 0; i < operations[0].length; i++) {
+                    const operation = operations[0][i]
                     operation.explaination = (typeof operation.explaination === 'undefined') ? operation.explanation : operation.explaination
-                    switch (operation.operation) {
-                        case "<INSERT>": {
-                            suggestionText.push("");
-                            component.push(
-                                <span key={i}>
-                                    <span onClick={() => {
-                                        suggestionText[i] = operation.sentence
-                                        component[i] = (<span style={{ color: "black" }} key={i}>{operation.sentence} </span>)
-                                        setSuggestionText([...suggestionText])
-                                        setSuggestion([...component])
-                                    }}
-                                        style={{
-                                            border: "1px solid green",
-                                            display: "inline",
-                                            placeItems: "center",
-                                            cursor: "pointer",
-                                            height: "100%",
-                                            outline: "none",
-                                            fontSize: "20px",
-                                            padding: "5px 10px",
-                                            borderRadius: "10px",
-                                            backgroundColor: "green",
-                                            color: "white",
-                                            marginRight: "5px"
-                                        }}>Add</span>
-                                    <div style={{ position: "relative", display: "inline" }} className="container">
-                                        <p style={{ color: "green", display: "inline" }}>{operation.sentence} </p>
-                                        <div className="popup" style={{ display: "inline" }}>
-                                            <p>{operation.explaination}</p>
-                                        </div>
-                                    </div>
-                                </span>
-                            )
-                            break;
-                        }
-                        case "<NOOP>": {
-                            suggestionText.push(operation.sentence);
-                            component.push(<div style={{ position: "relative", display: "inline" }} className="container">
-                                <p style={{ color: "black", display: "inline" }}>{operation.sentence} </p>
-                                <div className="popup" style={{ display: "inline" }}>
-                                    <p>{operation.explaination}</p>
-                                </div>
-                            </div>)
-                            break;
-                        }
-                        case "<REPLACE>": {
-                            console.log(operation.explaination)
-                            suggestionText.push(operation.old_sentence);
-
-                            component.push(
-                                <span key={i}>
-                                    <span onClick={() => {
-                                        suggestionText[i] = operation.sentence
-                                        component[i] = (<span style={{ color: "black" }} key={i}>{operation.sentence} </span>)
-                                        setSuggestionText([...suggestionText])
-                                        setSuggestion([...component])
-                                    }}
-                                        style={{
-                                            border: "1px solid red",
-                                            display: "inline",
-                                            placeItems: "center",
-                                            cursor: "pointer",
-                                            height: "100%",
-                                            outline: "none",
-                                            fontSize: "20px",
-                                            padding: "5px 10px",
-                                            borderRadius: "10px",
-                                            backgroundColor: "red",
-                                            color: "white",
-                                            marginRight: "5px"
-                                        }}>Replace</span><span style={{ color: "black" }}><s>{operation.old_sentence} </s></span>
-                                    <div style={{ position: "relative", display: "inline" }} className="container">
-                                        <p style={{ color: "green", display: "inline" }}>{operation.sentence} </p>
-                                        <div className="popup" style={{ display: "inline" }}>
-                                            <p>{operation.explaination}</p>
-                                        </div>
-                                    </div>
-                                </span>
-                            )
-
-                            break;
-                        }
-                        default:
-                            break;
-                    }
+                    suggestionText.push(operation.sentence);
+                    component.push(<div style={{ position: "relative", display: "inline" }} className="container">
+                        <p style={{ color: "black", display: "inline" }}>{operation.sentence} </p>
+                        {/* <div className="popup" style={{ display: "inline" }}>
+                            <p>{operation.explaination}</p>
+                        </div> */}
+                    </div>)
                 }
+                for (let i = 0; i < operations[1].length; i++) {
+                    const operation = operations[1][i]
+                    operation.explaination = (typeof operation.explaination === 'undefined') ? operation.explanation : operation.explaination
+                    suggestionText1.push(operation.sentence);
+                    component.push(<div style={{ position: "relative", display: "inline" }} className="container">
+                        <p style={{ color: "black", display: "inline" }}>{operation.sentence} </p>
+                        {/* <div className="popup" style={{ display: "inline" }}>
+                            <p>{operation.explaination}</p>
+                        </div> */}
+                    </div>)
+                }
+                // for (let i = 0; i < operations[2].length; i++) {
+                //     const operation = operations[2][i]
+                //     operation.explaination = (typeof operation.explaination === 'undefined') ? operation.explanation : operation.explaination
+                //     suggestionText2.push(operation.sentence);
+                //     component.push(<div style={{ position: "relative", display: "inline" }} className="container">
+                //         <p style={{ color: "black", display: "inline" }}>{operation.sentence} </p>
+                //         {/* <div className="popup" style={{ display: "inline" }}>
+                //             <p>{operation.explaination}</p>
+                //         </div> */}
+                //     </div>)
+                // }
                 setSuggestionText([...suggestionText])
                 setSuggestion([...component])
+                setSuggestionText1([...suggestionText1])
+                setSuggestion1([...component])
+                setSuggestionText2([...suggestionText2])
+                setSuggestion2([...component])
+                setIsLoading(false)
             })
-            .catch(error => console.log('error', error));
+            .catch((error) => {
+                console.log('error', error)
+                setIsLoading(false)
+            });
     }
 
     const checkAndSendMessage = async () => {
@@ -196,17 +156,9 @@ export default function Chat(props) {
                     .then(response => response.text())
                     .then((result) => {
                         let score = JSON.parse(result).score
-                        console.log(score)
-                        // if (score < 1) {
-                        //     alert("Your response could be improved. Please check the suggestion below.")
-                        //     setNeedHelp(true)
-                        //     setSuggestion([])
-                        //     return
-                        // } else {
                         setNeedHelp(false)
                         sendMessage()
                         sendMessageArtificial()
-                        // }
                     })
                     .catch(error => console.log('error', error));
 
@@ -373,12 +325,17 @@ export default function Chat(props) {
         <div style={{ width: "100%", height: "100vh", display: "flex", flexDirection: "column", justifyContent: "space-between", overflowX: "hidden", overflowY: "scroll" }}>
             <div>
                 <div style={{ height: "100px", background: "#263238", display: "flex", alignItems: "center", justifyContent: "space-between", margin: "0" }}>
-                    <p style={{ fontSize: "32px", color: "white", marginLeft: "10px", fontWeight: "bold" }}>ThoughtFull<span style={{ color: "#205bec" }}></span> live training session</p>
+                    <p style={{ fontSize: "32px", color: "white", marginLeft: "10px", fontWeight: "bold" }}><span style={{ color: "#249182" }}>Alice</span> chatbot</p>
                     <div style={{ marginRight: "10px" }}>
                         <button onClick={() => {
                             navigate('/', { replace: true })
                         }} style={{ cursor: "pointer", padding: "10px 20px", borderRadius: "10px", backgroundColor: "white", borderColor: "transparent", fontSize: "20px" }}>Back to home</button>
                     </div>
+                </div>
+                <div style={{ height: "100px", background: "#263238", display: "flex", alignItems: "center", justifyContent: "space-between", margin: "0" }}>
+                    <p style={{ fontSize: "20px", color: "white", marginLeft: "10px"}}>
+                        Alice is a chatbot, but it can have feeling too. She is 30 years old girl who has been experienced anxiety and stressed lately because of workplace politics. She is looking for someone to talk to and share her feelings. She is a bit shy and not confident to talk to people. She is also afraid of being judged by others. She is looking for someone who can listen to her and give her some advice. Please remember: after all she is just a machine, so don't ask something out of context.
+                    </p>
                 </div>
                 <div style={{ width: "100%", height: "100%" }}>
                     {renderMessage()}
@@ -392,7 +349,41 @@ export default function Chat(props) {
                     <button style={{ display: `${needHelp ? "inline" : "none"}`, margin: "10px 0px 10px 30px", padding: "10px 20px", borderRadius: "10px", backgroundColor: "transparent", fontSize: "16px", cursor: "pointer" }}>Would you like to have some suggestions?</button>
                 </div>
                 <div style={{ width: "100%" }}>
+                    <div style={{ justifyContent: "space-between", alignItems: "center", border: "1px solid black", display: `${suggestion1.length === 0 ? "none" : "flex"}`, margin: "10px 30px 10px 30px", padding: "10px 20px", borderRadius: "10px", fontSize: "16px" }}>
+                        {/* Reload buttons */}
+                        <p style={{ fontSize: "20px" }}>
+                            {suggestion1}
+                        </p>
+                        <button onClick={() => {
+                            let text = ""
+                            for (let i = 0; i < suggestionText1.length; i++) {
+                                text += (suggestionText1[i] + " ")
+                            }
+                            setCurrentMessage(text)
+                            setSuggestionText([])
+                            setSuggestion([])
+                            setSuggestionText1([])
+                            setSuggestion1([])
+                            setSuggestionText2([])
+                            setSuggestion2([])
+                        }} style={{
+                            border: "1px solid transparent",
+                            display: "grid",
+                            placeItems: "center",
+                            cursor: "pointer",
+                            height: "100%",
+                            outline: "none",
+                            fontSize: "20px",
+                            padding: "10px 20px",
+                            borderRadius: "10px",
+                            backgroundColor: "#205bec",
+                            color: "white"
+                        }}>Apply changes</button>
+                    </div>
+                </div>
+                <div style={{ width: "100%" }}>
                     <div style={{ justifyContent: "space-between", alignItems: "center", border: "1px solid black", display: `${suggestion.length === 0 ? "none" : "flex"}`, margin: "10px 30px 10px 30px", padding: "10px 20px", borderRadius: "10px", fontSize: "16px" }}>
+                        {/* Reload buttons */}
                         <p style={{ fontSize: "20px" }}>
                             <i onClick={async () => {
                                 await getSuggestion()
@@ -408,6 +399,10 @@ export default function Chat(props) {
                             setCurrentMessage(text)
                             setSuggestionText([])
                             setSuggestion([])
+                            setSuggestionText1([])
+                            setSuggestion1([])
+                            setSuggestionText2([])
+                            setSuggestion2([])
                         }} style={{
                             border: "1px solid transparent",
                             display: "grid",
@@ -444,39 +439,29 @@ export default function Chat(props) {
                             event.key === "Enter" && checkAndSendMessage();
                         }}
                     />
-                    {/* <button style={{
-                        border: "0",
-                        display: `${username === "professional" ? "grid" : "none"}`,
-                        placeItems: "center",
-                        cursor: "pointer",
-                        flex: "10%",
-                        height: "100%",
-                        backgroundColor: "transparent",
-                        outline: "none",
-                        fontSize: "25px",
-                        color: "black",
-                        fontWeight: "bold",
-                        borderRight: "1px dotted black"
-                    }} onClick={async () => {
-                        await getText();
-                    }}>Get text</button> */}
-                    <button style={{
-                        border: "0",
-                        display: `${username === "professional" ? "grid" : "none"}`,
-                        placeItems: "center",
-                        cursor: "pointer",
-                        flex: "15%",
-                        height: "100%",
-                        backgroundColor: "transparent",
-                        outline: "none",
-                        fontSize: "25px",
-                        color: "black",
-                        fontWeight: "bold",
-                        borderRight: "1px dotted black"
-                    }} onClick={async () => {
-                        await getSuggestion()
-                        setNeedHelp(false)
-                    }}>Get suggestion</button>
+                    <button 
+                        style={{
+                            border: "0",
+                            display: `${username === "professional" ? "grid" : "none"}`,
+                            placeItems: "center",
+                            cursor: "pointer",
+                            flex: "15%",
+                            height: "100%",
+                            backgroundColor: "transparent",
+                            outline: "none",
+                            fontSize: "25px",
+                            color: "black",
+                            fontWeight: "bold",
+                            borderRight: "1px dotted black"
+                        }} 
+                        onClick={async () => {
+                            await getSuggestion()
+                            setNeedHelp(false)
+                        }}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Loading...' : 'Get suggestion'}
+                    </button>
                     <button style={{
                         border: "0",
                         display: "grid",
